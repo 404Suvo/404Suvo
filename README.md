@@ -1,34 +1,31 @@
 
-## My 3D GitHub Contributions
-
-![3D Contributions](./profile-3d-contrib/profile-night-rainbow.svg)
-
-name: GitHub-Profile-3D-Contrib
+name: Generate 3D Contributions
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 18 * * *"
-  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build:
+  generate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: yoshi389111/github-profile-3d-contrib@latest
+      - name: Generate contribution graph
+        uses: yoshi389111/github-profile-3d-contrib@latest
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Commit and Push
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Commit generated images
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add -A .
-          if git commit -m "Generate 3D contribution graph"; then
-            git push
-          fi
+          git add -A
+          git diff --cached --quiet || git commit -m "Update 3D contributions"
+          git push
